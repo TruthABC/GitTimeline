@@ -29,6 +29,21 @@
     </repositories>
 
     <dependencies>
+
+        <!--mysql connector-->
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>6.0.5</version>
+        </dependency>
+
+        <!--java parser-->
+        <dependency>
+            <groupId>com.google.code.javaparser</groupId>
+            <artifactId>javaparser</artifactId>
+            <version>1.0.11</version>
+        </dependency>
+
         <!-- jGit - Core Library -->
         <dependency>
             <groupId>org.eclipse.jgit</groupId>

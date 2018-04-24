@@ -7,12 +7,14 @@ import java.util.Date;
 public class Project implements Serializable {
 
     private String projectUrl;
+    private String pureName;
     private String projectPath;
     private Date lastUpdate;
     private ArrayList<Commit> commitList;
 
-    public Project(String projectUrl, String projectPath, Date lastUpdate, ArrayList<Commit> commitList) {
+    public Project(String projectUrl, String pureName, String projectPath, Date lastUpdate, ArrayList<Commit> commitList) {
         this.projectUrl = projectUrl;
+        this.pureName = pureName;
         this.projectPath = projectPath;
         this.lastUpdate = lastUpdate;
         this.commitList = commitList;
@@ -24,6 +26,14 @@ public class Project implements Serializable {
 
     public void setProjectUrl(String projectUrl) {
         this.projectUrl = projectUrl;
+    }
+
+    public String getPureName() {
+        return pureName;
+    }
+
+    public void setPureName(String pureName) {
+        this.pureName = pureName;
     }
 
     public String getProjectPath() {

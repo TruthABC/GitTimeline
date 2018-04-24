@@ -1,4 +1,4 @@
-package main;
+package casesample;
 
 import jgit.JGitExample;
 import org.eclipse.jgit.diff.DiffEntry;
@@ -12,12 +12,12 @@ import java.util.List;
 /**
  * 测试，试运行JGitExample的getDiffList功能
  */
-public class JGitDiffUsageSample {
+public class CaseSampleJGitDiffUsage {
 
     public static void main(String[] args) {
 
-        String projectUrl = "https://github.com/TruthABC/FucanBackend";
-        String projectPath = "FucanBackend";
+        String projectUrl = "https://github.com/sikaozhe1997/Xin-Yue";
+        String projectPath = "Xin-Yue";
 //        String projectUrl = "https://github.com/MrDoomy/Torch";
 //        String projectPath = "Torch";
 

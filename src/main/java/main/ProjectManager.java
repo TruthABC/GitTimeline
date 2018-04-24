@@ -52,7 +52,7 @@ public class ProjectManager {
 
         /* 紧接着需要载入缓存信息 */
         try {
-            loadCache();
+            loadProjectCache();
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
             System.out.println("initByUrl(): Cache Loading Error. (Suggestion: initByUrl() Again)");
@@ -64,21 +64,21 @@ public class ProjectManager {
      * @throws IOException
      * @throws ClassNotFoundException
      */
-    private void loadCache() throws IOException, ClassNotFoundException {
+    private void loadProjectCache() throws IOException, ClassNotFoundException {
         File cacheFile = new File(pureName + ".psv");//psv - project save file
         if (!cacheFile.exists()) {
-            System.out.println("loadCache(): No Cache To Load.");
+            System.out.println("loadProjectCache(): No Cache To Load.");
             return;
         }
 
-        //若缓存文件存在，则载入缓存必须正确否则终止程序
+        //若缓存文件存在，则载入缓存理应正确
         FileInputStream fis = new FileInputStream(cacheFile);
         ObjectInputStream ois = new ObjectInputStream(fis);
         projectCache = (Project) ois.readObject();
         ois.close();
         fis.close();
         isProjectCached = true;
-        System.out.println("loadCache(): Cache Loaded");
+        System.out.println("loadProjectCache(): Cache Loaded");
     }
 
     /**
@@ -88,7 +88,7 @@ public class ProjectManager {
         System.out.println("--- Downloading Project ---");
 
         //删除旧缓存文件
-        deleteProjectCache();
+        deleteCache();
         
         //删除旧缓存对应的仓库
         FileTool.deleteDir(new File(projectPath));
@@ -115,15 +115,23 @@ public class ProjectManager {
     }
 
     /**
-     * 删除旧缓存
+     * 删除旧缓存（附带的先要删除APICounting缓存）
      */
-    private void deleteProjectCache() {
-        File cacheFile = new File(pureName + ".psv");//psv - project save file
-        if (cacheFile.exists()) {
-            FileTool.deleteDir(cacheFile);
-            System.out.println("downloadProject(): Old Cache Deleted");
+    private void deleteCache() {
+        File countingCacheFile = new File(pureName + ".asv");//asv - APICounters save file
+        if (countingCacheFile.exists()) {
+            FileTool.deleteDir(countingCacheFile);
+            System.out.println("deleteCache(): Old Counting Cache Deleted");
         } else {
-            System.out.println("downloadProject(): Old Cache Not Exist");
+            System.out.println("deleteCache(): Old Counting Cache Not Exist");
+        }
+
+        File projectCacheFile = new File(pureName + ".psv");//psv - project save file
+        if (projectCacheFile.exists()) {
+            FileTool.deleteDir(projectCacheFile);
+            System.out.println("deleteCache(): Old Project Cache Deleted");
+        } else {
+            System.out.println("deleteCache(): Old Project Cache Not Exist");
         }
         projectCache = null;
         isProjectCached = false;
@@ -143,7 +151,7 @@ public class ProjectManager {
         jGit.close();
 
         /* 枚举所有commit，得到数据，填充ProjectCache */
-        Project project = new Project(projectUrl, projectPath, new Date(), new ArrayList<Commit>());
+        Project project = new Project(projectUrl, pureName, projectPath, new Date(), new ArrayList<Commit>());
         for (int i = 0; i < commitList.size(); i++){
             RevCommit revCommit = commitList.get(i);
 
