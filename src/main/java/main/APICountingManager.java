@@ -42,71 +42,11 @@ public class APICountingManager {
     }
 
     /**
-     * 只执行一次，用于构造androidAPISet（内存化判定安卓API）
-     */
-    private void initAndroidAPISet() {
-        System.out.println("--- Initializing Android API Set ---");
-
-        //read from cache file
-        File androidAPISetCacheFile = new File(AndroidAPISetCache.CACHE_FILE_NAME);
-        if (androidAPISetCacheFile.exists()) {
-            try {
-                FileInputStream fis = new FileInputStream(androidAPISetCacheFile);
-                ObjectInputStream ois = new ObjectInputStream(fis);
-                AndroidAPISetCache aasc = (AndroidAPISetCache) ois.readObject();
-                androidAPISet = aasc.getSet();
-                ois.close();
-                fis.close();
-                System.out.println("initAndroidAPISet(): From File Totally (" + androidAPISet.size() + ") Android APIs");
-            } catch (IOException | ClassNotFoundException e) {
-                e.printStackTrace();
-                System.out.println("initAndroidAPISet(): File Cache read Operation GG");
-            }
-            return;
-        }
-
-        //read from DB
-        androidAPISet = new HashSet<String>();
-        try {
-            DBConnect dbConnect = new DBConnect(Global.DB_URL, Global.DB_USER, Global.DB_PASSWORD);
-            ResultSet resultSet = dbConnect.executeQuery("SELECT `classname` FROM android_api.apis");
-            while(resultSet.next()){
-                String classname = resultSet.getString("classname");
-                if (!androidAPISet.contains(classname)){
-                    androidAPISet.add(classname);
-                }
-            }
-            resultSet.close();
-            dbConnect.close();
-            System.out.println("initAndroidAPISet(): From DB Totally (" + androidAPISet.size() + ") Android APIs");
-        } catch (SQLException e) {
-            e.printStackTrace();
-            System.out.println("initAndroidAPISet(): DataBase Operation GG");
-            System.exit(1);
-        }
-        //把DB里的数据缓存进文件
-        try {
-            if (!androidAPISetCacheFile.createNewFile()) {
-                throw new IOException();
-            }
-            FileOutputStream fos = new FileOutputStream(androidAPISetCacheFile);
-            ObjectOutputStream oos = new ObjectOutputStream(fos);
-            oos.writeObject(new AndroidAPISetCache(androidAPISet));
-            oos.close();
-            fos.close();
-            System.out.println("initAndroidAPISet(): Cache Save Operation Finished");
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.out.println("initAndroidAPISet(): Cache Save Operation GG");
-        }
-    }
-
-    /**
-     * 根据project初始化APICountingManager；被构造函数自动调用；会尝试载入缓存
+     * [Public Methods (1/5)]根据project初始化APICountingManager；被构造函数自动调用；会尝试载入缓存
      * @param project
      */
     public void initByProject(Project project) {
-        System.out.println("--- Initializing By Project ---");
+        System.out.println("--- APICountingManager: Initializing By Project ---");
 
         /* 初始化变量 */
         this.project = project;
@@ -130,29 +70,7 @@ public class APICountingManager {
     }
 
     /**
-     * 读取固定文件中的APICounters对象；默认用户不会删除或者修改Counting缓存文件，不会新建缓存文件；在初始化时自动被调用
-     * @throws IOException
-     * @throws ClassNotFoundException
-     */
-    private void loadCountingCache() throws IOException, ClassNotFoundException {
-        File cacheFile = new File(project.getPureName() + ".asv");//asv - APICounters save file
-        if (!cacheFile.exists()) {
-            System.out.println("loadCountingCache(): No Cache To Load.");
-            return;
-        }
-
-        //若缓存文件存在，则载入缓存理应正确
-        FileInputStream fis = new FileInputStream(cacheFile);
-        ObjectInputStream ois = new ObjectInputStream(fis);
-        countingCache = (APICounters) ois.readObject();
-        ois.close();
-        fis.close();
-        countingNow = countingCache.getApiCounterList().size();
-        System.out.println("loadCountingCache(): Cache Loaded");
-    }
-
-    /**
-     * 删除旧缓存（通常不使用，除非希望在不更新项目的情况下，重新分析
+     * [Public Methods (2/5)]删除旧缓存（通常不使用，除非希望在不更新项目的情况下，重新分析
      */
     public void deleteCountingCache() {
         System.out.println("--- Deleting Counting Cache ---");
@@ -168,7 +86,7 @@ public class APICountingManager {
     }
 
     /**
-     * 将缓存从内存写到文件中
+     * [Public Methods (3/5)]将缓存从内存写到文件中
      * @throws IOException
      */
     public void saveCountingCache() throws IOException {
@@ -200,7 +118,7 @@ public class APICountingManager {
     }
 
     /**
-     * 是否还有下一个待分析commit
+     * [Public Methods (4/5)]是否还有下一个待分析commit
      * @return 有true 没有false
      */
     public boolean hasNextCommit() {
@@ -208,15 +126,17 @@ public class APICountingManager {
     }
 
     /**
-     * 分析下一个待分析commit
-     * @return
+     * [Public Methods (5/5)]分析下一个待分析commit
+     * @return 返回下一个commit的API计数Map
      */
     public APICounter analyseNextCommit() {
         System.out.println("--- Analysing Next Commit [" + countingNow + "] ---");
+
         //如果没有下一次的未分析commit直接返回null
         if (!hasNextCommit()) {
             return null;
         }
+
         //提示信息
         System.out.println("analyseNextCommit(): processNow = " + countingNow + "/"+ project.getCommitList().size());
         //首次commit，需要实例化一个APICounters对象给countingCache
@@ -232,7 +152,7 @@ public class APICountingManager {
         String oldCommitName = project.getCommitList().get(countingNow-1).getCommitName();
         String newCommitName = project.getCommitList().get(countingNow).getCommitName();
         HashMap<String, Long> diff = analyseCommitDiff(oldCommitName, newCommitName);
-        HashMap<String, Long> base = countingCache.getApiCounterList().get(countingNow-1).getApiFrequency();
+        HashMap<String, Long> base = new HashMap<String, Long>(countingCache.getApiCounterList().get(countingNow-1).getApiFrequency());
 
         for (String s: diff.keySet()) {
             long temp;
@@ -241,10 +161,14 @@ public class APICountingManager {
             } else {
                 temp = base.get(s) + diff.get(s);
             }
-            if (temp >= 0) {
+            if (temp > 0) {
                 base.put(s, temp);
+            } else if (temp < 0) {
+                System.out.println("analyseNextCommit(): Error - Should not be printed[1]");
             } else {
-                System.out.println("analyseNextCommit(): Should not be printed[1]");
+                if (base.containsKey(s)) {
+                    base.remove(s);
+                }
             }
         }
 
@@ -257,22 +181,103 @@ public class APICountingManager {
     }
 
     /**
+     * private且只执行一次，仅被构造函数调用，用于构造androidAPISet（内存化判定安卓API）
+     */
+    private void initAndroidAPISet() {
+        //read from cache file
+        File androidAPISetCacheFile = new File(AndroidAPISetCache.CACHE_FILE_NAME);
+        if (androidAPISetCacheFile.exists()) {
+            try {
+                FileInputStream fis = new FileInputStream(androidAPISetCacheFile);
+                ObjectInputStream ois = new ObjectInputStream(fis);
+                AndroidAPISetCache aasc = (AndroidAPISetCache) ois.readObject();
+                androidAPISet = aasc.getSet();
+                ois.close();
+                fis.close();
+                System.out.println("initAndroidAPISet(): From File Totally (" + androidAPISet.size() + ") Android APIs");
+            } catch (IOException | ClassNotFoundException e) {
+                e.printStackTrace();
+                System.out.println("initAndroidAPISet(): File Cache read Operation GG");
+                androidAPISetCacheFile.delete();
+            }
+            return;
+        }
+
+        //read from DB
+        androidAPISet = new HashSet<String>();
+        try {
+            DBConnect dbConnect = new DBConnect(Global.DB_URL, Global.DB_USER, Global.DB_PASSWORD);
+            ResultSet resultSet = dbConnect.executeQuery("SELECT `classname` FROM android_api.apis");
+            while(resultSet.next()){
+                String classname = resultSet.getString("classname");
+                if (!androidAPISet.contains(classname)){
+                    androidAPISet.add(classname);
+                }
+            }
+            resultSet.close();
+            dbConnect.close();
+            System.out.println("initAndroidAPISet(): From DB Totally (" + androidAPISet.size() + ") Android APIs");
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.out.println("initAndroidAPISet(): DataBase Operation GG");
+            System.exit(1);
+        }
+        //DB to file chace
+        try {
+            if (!androidAPISetCacheFile.createNewFile()) {
+                throw new IOException();
+            }
+            FileOutputStream fos = new FileOutputStream(androidAPISetCacheFile);
+            ObjectOutputStream oos = new ObjectOutputStream(fos);
+            oos.writeObject(new AndroidAPISetCache(androidAPISet));
+            oos.close();
+            fos.close();
+            System.out.println("initAndroidAPISet(): Cache Save Operation Finished");
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("initAndroidAPISet(): Cache Save Operation GG");
+        }
+    }
+
+    /**
+     * 读取固定文件中的APICounters对象；默认用户不会删除或者修改Counting缓存文件，不会新建缓存文件；在初始化时自动被调用
+     * private 且仅一处调用：被initByProject()
+     * @throws IOException
+     * @throws ClassNotFoundException
+     */
+    private void loadCountingCache() throws IOException, ClassNotFoundException {
+        File cacheFile = new File(project.getPureName() + ".asv");//asv - APICounters save file
+        if (!cacheFile.exists()) {
+            System.out.println("loadCountingCache(): No Cache To Load.");
+            return;
+        }
+
+        //若缓存文件存在，则载入缓存理应正确
+        FileInputStream fis = new FileInputStream(cacheFile);
+        ObjectInputStream ois = new ObjectInputStream(fis);
+        countingCache = (APICounters) ois.readObject();
+        ois.close();
+        fis.close();
+        countingNow = countingCache.getApiCounterList().size();
+        System.out.println("loadCountingCache(): Cache Loaded");
+    }
+
+    /**
      * 分析首次commit的API调用统计信息
+     * private 且仅一处调用：被analyseNextCommit()
      * @return 返回分析后的结果
      */
     private HashMap<String, Long> analyseFirstCommit() {
-        HashMap<String, Long> ret = new HashMap<>();
-
         /* 切换到首次commit */
         //分支切换出错的原因，1、数据库的commits表的msg字段单引号注入错误（解决） 2、文件输入流没有close（解决）
         try {
             JGitExample jGit = new JGitExample(project.getProjectPath() + "/.git");
-            jGit.checkout(project.getCommitList().get(countingNow).getCommitName());
+            jGit.checkout(project.getCommitList().get(0).getCommitName());
             jGit.close();
         } catch (Exception e) {
             System.out.println("analyseFirstCommit(): Checkout Error");
             checkoutFault++;
-            return ret;
+            return new HashMap<String, Long>();
         }
 
         /* 得到所有.java文件 */
@@ -280,6 +285,7 @@ public class APICountingManager {
         FileTool.listFiles(javaFiles, new File(project.getProjectPath()),".java");
 
         /* 统计引用的安卓API数 */
+        HashMap<String, Long> ret = new HashMap<String, Long>();
         for (File jf: javaFiles) {
             countAPI(jf, ret);
         }
@@ -288,6 +294,13 @@ public class APICountingManager {
         return ret;
     }
 
+    /**
+     * 分析两次commit的API计数差值Map
+     * private 且仅一处调用：被analyseNextCommit()
+     * @param oldCommitName
+     * @param newCommitName
+     * @return
+     */
     private HashMap<String, Long> analyseCommitDiff(String oldCommitName, String newCommitName) {
         /* Step 0 得到版本差异的DiffEntry列表 */
         JGitExample jGit = new JGitExample(project.getProjectPath() + "/.git");
@@ -301,6 +314,7 @@ public class APICountingManager {
             //通常不出错，分支切换出错的原因，1、数据库的commits表的msg字段单引号注入错误（解决） 2、文件输入流没有close（解决）
             System.out.println("analyseCommitDiff(): Checkout Old Commit Error - " + oldCommitName);
             checkoutFault++;
+            return new HashMap<String, Long>();
         }
         List<File> oldJavaFiles = new ArrayList<File>();
         for (DiffEntry entry: diffList) {
@@ -322,6 +336,7 @@ public class APICountingManager {
             //通常不出错，分支切换出错的原因，1、数据库的commits表的msg字段单引号注入错误（解决） 2、文件输入流没有close（解决）
             System.out.println("analyseCommitDiff(): Checkout New Commit Error - " + newCommitName);
             checkoutFault++;
+            return new HashMap<String, Long>();
         }
         List<File> newJavaFiles = new ArrayList<File>();
         for (DiffEntry entry: diffList) {
@@ -354,6 +369,7 @@ public class APICountingManager {
 
     /**
      * 计算该文件中的安卓API种类与个数,累加进入apiFrequency(HashMap)
+     * private且仅被调用三次，均为analyseNextCommit()方法
      * @param file 一个目标java文件
      * @param apiFrequency 最终统计结果Map的引用
      */

@@ -7,7 +7,12 @@ import serializable.APICounters;
 import serializable.Commit;
 import serializable.Project;
 
+import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 测试，试用APICountingManager对象
@@ -17,43 +22,38 @@ public class CaseSampleAPICountingManagerUsage {
     private static final String projectUrl = "https://github.com/MrDoomy/Torch";
 //    private static final String projectUrl = "https://github.com/sikaozhe1997/Xin-Yue";
 
-    public static void main(String[] args) {
-        Project p = loadOrDownloadProject();
-        countAPI(p);
+    /**
+     * 先确保项目存在；然后计数；然后读取缓存并操作（对比ProjectAPICounterNaive生成的"output.txt"文件）
+     * @param args
+     */
+    public static void main(String[] args) throws IOException {
+        Project p = loadOrDownloadProject(projectUrl);
+        APICountingManager am = anylyseAllCommit(p);
+        printToFile(am);
     }
 
-    private static Project loadOrDownloadProject() {
+    private static Project loadOrDownloadProject(String projectUrl) {
         ProjectManager pm = new ProjectManager(projectUrl);
-        Project p;
-
         System.out.println("--- After ProjectManager Constructed ---");
         System.out.println("pm.isProjectCached() - " + pm.isProjectCached());
 
         if (!pm.isProjectCached()) {
             pm.downloadProject();
-        }
-        p = pm.getProjectCache();
-
-        System.out.println("--- After Project Ready ---");
-        System.out.println("p.getProjectUrl() - " + p.getProjectUrl());
-        System.out.println("p.getProjectPureName() - " + p.getPureName());
-        System.out.println("p.getProjectPath() - " + p.getProjectPath());
-        System.out.println("p.getLastUpdate() - " + p.getLastUpdate());
-        for (Commit c : p.getCommitList()) {
-            System.out.println("[commit - " + c.getCommitIndex() + "] " + c.getCommitShortMessage());
+            System.out.println("--- After Project Downloaded ---");
+            System.out.println("pm.isProjectCached() - " + pm.isProjectCached());
         }
 
-        return p;
+        CaseSampleProjectManagerUsage.showProject(pm.getProjectCache());
+        return pm.getProjectCache();
     }
 
-    private static void countAPI(Project p) {
+    private static APICountingManager anylyseAllCommit(Project p) throws IOException {
         APICountingManager am = new APICountingManager(p);
         System.out.println("--- After APICountingManager Constructed ---");
-
         System.out.println("am.getCountingNow() = " + am.getCountingNow());
         System.out.println("p.getCommitList().size() = " + p.getCommitList().size());
 
-//        am.deleteCountingCache();
+        am.deleteCountingCache();
 
         while (am.hasNextCommit()) {
             am.analyseNextCommit();
@@ -67,17 +67,15 @@ public class CaseSampleAPICountingManagerUsage {
         System.out.println("am.getCountingNow() = " + am.getCountingNow());
         System.out.println("p.getCommitList().size() = " + p.getCommitList().size());
 
-        System.out.println("am.hasNextCommit() = " + am.hasNextCommit());
-
         APICounters a = am.getCountingCache();
         System.out.println("a.getLastUpdate() = " + a.getLastUpdate());
-        for (APICounter aa: a.getApiCounterList()) {
-            System.out.println("    aa.getCommitIndex() = " + aa.getCommitIndex());
-            for (String s: aa.getApiFrequency().keySet()) {
-                System.out.println("        s = " + s);
-                System.out.println("        aa.getApiFrequency().get(s) = " + aa.getApiFrequency().get(s));
-            }
-        }
+//        for (APICounter aa: a.getApiCounterList()) {
+//            System.out.println("    aa.getCommitIndex() = " + aa.getCommitIndex());
+//            for (String s: aa.getApiFrequency().keySet()) {
+//                System.out.println("        s = " + s);
+//                System.out.println("        aa.getApiFrequency().get(s) = " + aa.getApiFrequency().get(s));
+//            }
+//        }
 
         if (am.getNewCountingCount() > 0) {
             try {
@@ -87,6 +85,49 @@ public class CaseSampleAPICountingManagerUsage {
                 System.exit(1);
             }
         }
+
+        return am;
+    }
+
+    private static void printToFile(APICountingManager am) throws IOException {
+        /* init */
+        File outFile = new File("output.txt");
+        if (outFile.exists()) {
+            if (!outFile.delete()) {
+                throw new IOException("Cannot Delete " + outFile.getPath());
+            }
+        }
+        PrintWriter out = new PrintWriter(outFile);
+
+        /* project */
+        out.println("projectUrl: " + am.getProject().getProjectUrl());
+        out.println("pureName: " + am.getProject().getPureName());
+        out.println("projectPath: " + am.getProject().getProjectPath());
+
+        /* 枚举：某次commit */
+        Project project = am.getProject();
+        APICounters apiCounters = am.getCountingCache();
+        for (int i = 0; i < project.getCommitList().size(); i++){
+            /* commit */
+            Commit commit = project.getCommitList().get(i);
+            out.println("[commit - " + i + "] " + commit.getCommitShortMessage());
+
+            /* APICounting排序并输出 */
+            APICounter apiCounter = apiCounters.getApiCounterList().get(i);
+            List<Map.Entry<String, Long>> mapping = new ArrayList<Map.Entry<String, Long>>(apiCounter.getApiFrequency().entrySet());
+            mapping.sort((o1, o2) -> o2.getValue().compareTo(o1.getValue()));
+            for (Map.Entry<String, Long> m: mapping) {
+                out.print("    " + m.getKey() + "(" + m.getValue() + ")");
+            }
+            out.println();
+        }
+
+        /* 提示信息 */
+        System.out.println("checkoutFault: " + am.getCheckoutFault());
+        System.out.println("countAPIFault: " + am.getCountAPIFault());
+
+        /* finish */
+        out.close();
     }
 
 }
