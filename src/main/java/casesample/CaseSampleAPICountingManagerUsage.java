@@ -19,7 +19,8 @@ import java.util.Map;
  */
 public class CaseSampleAPICountingManagerUsage {
 
-    private static final String projectUrl = "https://github.com/MrDoomy/Torch";
+    private static final String projectUrl = "https://github.com/pinguo-yuyidong/Camera2";
+//    private static final String projectUrl = "https://github.com/MrDoomy/Torch";
 //    private static final String projectUrl = "https://github.com/sikaozhe1997/Xin-Yue";
 
     /**

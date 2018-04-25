@@ -21,7 +21,8 @@ public class ProjectAPICounterNaive {
 
     public static void main(String args[]) throws IOException {
 
-        ProjectAPICounterNaive pac = new ProjectAPICounterNaive("https://github.com/MrDoomy/Torch");
+//        ProjectAPICounterNaive pac = new ProjectAPICounterNaive("https://github.com/MrDoomy/Torch");
+        ProjectAPICounterNaive pac = new ProjectAPICounterNaive("https://github.com/pinguo-yuyidong/Camera2");
 
         /* 下载项目到本地 */
         pac.downloadProject();
