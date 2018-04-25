@@ -17,6 +17,31 @@
 * 20180424 - 完成：安卓官方API数据半脱离数据库
 * 20180424 - APICountingManager更新缓存规则尝试(TODO)：新工作的commit序号为二的幂时缓存。
 * 20180424 - 尝试CaseSample测试
+* 20180425 - 调试、重构；确保了算法正确性；提供了验证算法正确的相关类（ProjectAPICounterNaive VS. CaseSampleAPICountingManagerUsage）
+
+### ProjectManager说明
+* 用于项目的克隆；project与commit数据的提取、缓存；
+* 构造方法：通过提供项目在线git仓库的url，形如"https://github.com/MrDoomy/Torch"，如有缓存则载入
+* 公共方法(1/2) - initByUrl(projectUrl)：希望作用于其他项目时，重新构造并初始化
+* 公共方法(2/2) - downloadProject()：将项目下载到本地（如有项目或者解析API的缓存则全部自动删除）
+* Getter - getProjectCache()：得到项目的详细缓存，内容详见serializable.Project & Commit
+* Getter - isProjectCached()：当前项目是否有缓存，是否被缓存过
+
+### APICountingManager说明
+* 用于项目每次Commit的API计数的解析，解析粒度为单次Commit
+* 构造方法：通过传入serializable.Project对象构造，如有缓存则载入（故需要使用到到ProjectManager）
+* 公共方法(1/5) - initByProject(project)：希望作用于其他项目时，重新构造并初始化
+* 公共方法(2/5) - deleteCountingCache()：如有API解析缓存则删除
+* 公共方法(3/5) - saveCountingCache()：如解析有新进度，将API解析写入缓存，覆盖旧缓存
+* 公共方法(4/5) - hasNextCommit()：是否还有下一个Commit没有进行解析
+* 公共方法(5/5) - analyseNextCommit()：如有下一个Commit没有进行解析，则解析下一个Commit（并返回单次Commit解析结果）
+* Setter - setShowDetail(int)：0不打印细节（默认0） or 1显示细节
+* Getter - getProject()：构造APICountingManager所用的Project对象
+* Getter - getCountingCache()：得到项目的详细缓存，内容详见serializable.APICounters & APICounter
+* Getter - getCountingNow()：Commit解析进度，0则进度为零，且说明缓存状态为无
+* Getter - getNewCountingCount()：内存即时信息，新进行的解析次数（用于判断是否有新的解析进展）
+* Getter - getCheckoutFault()：内存即时信息，解析过程中checkout的失败次数
+* Getter - getCountAPIFault()：内存即时信息，解析过程中API技术过程的出错次数（例如总的编译不通过java文件数）
 
 ### 研究进展
 * 20180320 - 

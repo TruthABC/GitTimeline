@@ -248,6 +248,8 @@ public class APICountingManager {
     private void loadCountingCache() throws IOException, ClassNotFoundException {
         File cacheFile = new File(project.getPureName() + ".asv");//asv - APICounters save file
         if (!cacheFile.exists()) {
+            countingCache = null;
+            countingNow = 0;
             System.out.println("loadCountingCache(): No Cache To Load.");
             return;
         }

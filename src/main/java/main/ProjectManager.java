@@ -113,6 +113,8 @@ public class ProjectManager {
     private void loadProjectCache() throws IOException, ClassNotFoundException {
         File cacheFile = new File(pureName + ".psv");//psv - project save file
         if (!cacheFile.exists()) {
+            projectCache = null;
+            isProjectCached = false;
             System.out.println("loadProjectCache(): No Cache To Load");
             return;
         }
