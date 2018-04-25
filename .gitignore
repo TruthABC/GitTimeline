@@ -8,6 +8,12 @@
 .idea/**/tasks.xml
 .idea/dictionaries
 Torch
+Torch.asv
+Torch.psv
+Xin-Yue
+Xin-Yue.asv
+Xin-Yue.psv
+!/AndroidAPISetCache
 
 # Sensitive or high-churn files:
 .idea/**/dataSources/
@@ -72,12 +78,3 @@ buildNumber.properties
 *.iml
 out
 gen
-AndroidAPISetCache
-Torch.asv
-Torch.psv
-Would skip repository Torch/
-Xin-Yue.asv
-Xin-Yue.psv
-Would skip repository Xin-Yue/
-src/main/resources/
-src/test/
