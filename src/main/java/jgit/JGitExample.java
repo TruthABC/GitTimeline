@@ -38,9 +38,9 @@ public class JGitExample {
             clone.setURI(url);
             clone.setDirectory(new File(targetPath));
             clone.call().close();
-        } catch (GitAPIException e) {
+        } catch (Exception e) {
             e.printStackTrace();
-            System.out.println("clone(): Cloning Error");
+            System.out.println("clone(): Error Happened");
             return false;
         }
         return true;
@@ -52,8 +52,9 @@ public class JGitExample {
         }
         try {
             git = Git.open(new File(gitRoot));
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
+            System.out.println("initGitRoot() Error Happened");
         }
     }
 
@@ -77,8 +78,9 @@ public class JGitExample {
                     return -1;//前不大于后“不”交换(-1)
                 }
             });
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
+            System.out.println("getGitCommitList() Error Happened");
         }
         return resList;
     }
@@ -99,6 +101,7 @@ public class JGitExample {
             checkout.call();
         } catch (Exception e) {
             e.printStackTrace();
+            System.out.println("checkout() Error Happened");
             return false;
         }
         return true;
@@ -131,6 +134,7 @@ public class JGitExample {
 
         } catch (Exception e) {
             e.printStackTrace();
+            System.out.println("getDiffList() Error Happened");
         }
 
         return diffList;
