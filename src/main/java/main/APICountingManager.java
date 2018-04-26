@@ -272,6 +272,7 @@ public class APICountingManager {
     private HashMap<String, Long> analyseFirstCommit() {
         /* 切换到首次commit */
         //分支切换出错的原因，1、数据库的commits表的msg字段单引号注入错误（解决） 2、文件输入流没有close（解决）
+        //分支出错危险外因，1、文件系统不支持文件，例如windows下不支持“|”作为文件名，大小写不敏感。
         try {
             JGitExample jGit = new JGitExample(project.getProjectPath() + "/.git");
             jGit.checkout(project.getCommitList().get(0).getCommitName());
@@ -312,18 +313,21 @@ public class APICountingManager {
 //        }
 
         /* Step 1.1 得到old版本diff的.java文件列表（需要先checkout）*/
+        int oldCheckoutFault = 0; // 0没异常；1有异常
         if (!jGit.checkout(oldCommitName)) {
             //通常不出错，分支切换出错的原因，1、数据库的commits表的msg字段单引号注入错误（解决） 2、文件输入流没有close（解决）
+            //分支出错危险外因，1、文件系统不支持文件，例如windows下不支持“|”作为文件名，大小写不敏感。
             System.out.println("analyseCommitDiff(): Checkout Old Commit Error - " + oldCommitName);
-            checkoutFault++;
-            return new HashMap<String, Long>();
+            oldCheckoutFault = 1;
         }
         List<File> oldJavaFiles = new ArrayList<File>();
-        for (DiffEntry entry: diffList) {
-            String path = project.getProjectPath() + "/" + entry.getOldPath();
-            File file = new File(path);
-            if (file.exists() && file.isFile() && path.length()>5 && path.substring(path.length()-5).equals(".java")) {
-                oldJavaFiles.add(file);
+        if (oldCheckoutFault != 1) {
+            for (DiffEntry entry: diffList) {
+                String path = project.getProjectPath() + "/" + entry.getOldPath();
+                File file = new File(path);
+                if (file.exists() && file.isFile() && path.length()>5 && path.substring(path.length()-5).equals(".java")) {
+                    oldJavaFiles.add(file);
+                }
             }
         }
 
@@ -334,18 +338,21 @@ public class APICountingManager {
         }
 
         /* Step 2.1 得到new版本diff的.java文件列表（需要先checkout） */
+        int newCheckoutFault = 0; // 0没异常；1有异常
         if (!jGit.checkout(newCommitName)) {
             //通常不出错，分支切换出错的原因，1、数据库的commits表的msg字段单引号注入错误（解决） 2、文件输入流没有close（解决）
+            //分支出错危险外因，1、文件系统不支持文件，例如windows下不支持“|”作为文件名，大小写不敏感。
             System.out.println("analyseCommitDiff(): Checkout New Commit Error - " + newCommitName);
-            checkoutFault++;
-            return new HashMap<String, Long>();
+            newCheckoutFault = 1;
         }
         List<File> newJavaFiles = new ArrayList<File>();
-        for (DiffEntry entry: diffList) {
-            String path = project.getProjectPath() + "/" + entry.getNewPath();
-            File file = new File(path);
-            if (file.exists() && file.isFile() && path.length()>5 && path.substring(path.length()-5).equals(".java")) {
-                newJavaFiles.add(file);
+        if (newCheckoutFault != 1) {
+            for (DiffEntry entry : diffList) {
+                String path = project.getProjectPath() + "/" + entry.getNewPath();
+                File file = new File(path);
+                if (file.exists() && file.isFile() && path.length() > 5 && path.substring(path.length() - 5).equals(".java")) {
+                    newJavaFiles.add(file);
+                }
             }
         }
 
@@ -366,6 +373,9 @@ public class APICountingManager {
 
         jGit.close();
         System.out.println("analyseCommitDiff(): Analysed End reach");
+        if (oldCheckoutFault + newCheckoutFault != 0) {
+            checkoutFault++;
+        }
         return apiFrequencyNew;
     }
 
