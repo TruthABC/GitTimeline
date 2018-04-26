@@ -3,21 +3,26 @@
 * Topic: A Visualization for Software Project Workspace and Evolution
 
 ### 开发者日志
-* 20180320 - 建立项目GitTimeline
-* 20180420 - 改变开发方向
-* 20180420 - 添加若干Serializable对象，用于将仓库及api调用频率内存信息序列化
-* 20180423 - “程序异常终止原则”，新约定：“文件非只读操作”例如delete与mkdir默认100%成功，不允许失败，如失败则终止程序 - System.exit(1)。
-* 20180423 - “程序异常终止原则”，新约定：与网络有关的操作例如clone，可以失败，失败后不终止程序。
-* 20180423 - 局限性：不允许项目同重名。（原因：项目缓存目录与文件名直接取了项目名）
-* 20180423 - 局限性懒人方案：引入新的项目，与已有项目重名，会被当做项目已经被缓存。则每次先清除缓存可以避免。
-* 20180423 - ProjectManager开发完成，场景说明：载入已有项目（无网络），新建项目（有网络），载入但更新已有项目（有网络）。
-* 20180423 - APICountingManager开发开始
-* 20180424 - 更改了Project(Serializable)，增加pureName属性。
-* 20180424 - 初步完成并调试了CountingManager
-* 20180424 - 完成：安卓官方API数据半脱离数据库
-* 20180424 - APICountingManager更新缓存规则尝试(TODO)：新工作的commit序号为二的幂时缓存。
-* 20180424 - 尝试CaseSample测试
-* 20180425 - 调试、重构；确保了算法正确性；提供了验证算法正确的相关类（ProjectAPICounterNaive VS. CaseSampleAPICountingManagerUsage）
+* 20180320 - 进度：建立项目GitTimeline
+* 20180420 - 进度：改变开发方向
+* 20180420 - 进度：添加若干Serializable对象，用于将仓库及api调用频率内存信息序列化
+* 20180423 - 注：“程序异常终止原则”，新约定：“文件非只读操作”例如delete与mkdir默认100%成功，不允许失败，如失败则终止程序 - System.exit(1)。
+* 20180423 - 注：“程序异常终止原则”，新约定：与网络有关的操作例如clone，可以失败，失败后不终止程序。
+* 20180423 - 注：局限性：不允许项目同重名。（原因：项目缓存目录与文件名直接取了项目名）
+* 20180423 - 注：局限性懒人方案：引入新的项目，与已有项目重名，会被当做项目已经被缓存。则每次先清除缓存可以避免。
+* 20180423 - 进度：ProjectManager开发完成，场景说明：载入已有项目（无网络），新建项目（有网络），载入但更新已有项目（有网络）。
+* 20180423 - 进度：APICountingManager开发开始
+* 20180424 - 进度：更改了Project(Serializable)，增加pureName属性。
+* 20180424 - 进度：初步完成并调试了CountingManager
+* 20180424 - 进度：安卓官方API数据半脱离数据库
+* 20180424 - 注：APICountingManager更新缓存规则尝试(TODO)：新工作的commit序号为二的幂时缓存。
+* 20180424 - 进度：尝试CaseSample测试
+* 20180425 - 进度：调试、重构；确保了算法正确性；提供了验证算法正确的相关类（ProjectAPICounterNaive VS. CaseSampleAPICountingManagerUsage）
+* 20180426 - 注：以上确保正确性的算法，对同样的MAP排序可能排出不一样的序
+* 20180426 - 进度：引入SpringBoot、WebSocket依赖，开发后端backend包
+* 20180426 - 注：WebSocket采用了广播模式（作为不支持多人同时使用工具标志之一）
+* 20180426 - 进度：开始开发后台service + controller，操作与前端对接
+
 
 ### ProjectManager说明
 * 用于项目的克隆；project与commit数据的提取、缓存；
