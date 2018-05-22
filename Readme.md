@@ -22,7 +22,12 @@
 * 20180426 - 进度：引入SpringBoot、WebSocket依赖，开发后端backend包
 * 20180426 - 注：WebSocket采用了广播模式（作为不支持多人同时使用工具标志之一）
 * 20180426 - 进度：开始开发后台service + controller，操作与前端对接
-
+* 20180427 - 听签证会，没去实验室，没写毕设，咕咕
+* 20180428 - 正在进行前端开发（鸽了三星期写毕业论文和图形学PJ2，咕咕）
+* 20180521 - 正在进行后端对接前端模块（数据组织功能）开发
+* 20180522 - AnalyseRepository功能开发完毕，前端已对接
+* 20180522 - TODO: Reanalyse与DeleteCache开发与对接
+* 20180522 - TODO: 图像渲染部分对接
 
 ### ProjectManager说明
 * 用于项目的克隆；project与commit数据的提取、缓存；

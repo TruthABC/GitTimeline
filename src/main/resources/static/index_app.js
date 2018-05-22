@@ -15,13 +15,16 @@ function disconnect() {
 }
 
 /* Web Socket Connect */
-function connect() {
+function connect(mission) {
     var socket = new SockJS(sockJSUrl);
     stompClient = Stomp.over(socket);
     stompClient.connect({}, function (frame) {
         console.log("Connected - " + frame);
         showConversation("Server Connection: " + frame);
         stompClient.subscribe(subscribePath, messageReceiver);
+        if (mission === "RequestAnalyseProject") {
+            requestAnalyseProject();
+        }
     });
 }
 
@@ -39,8 +42,11 @@ function messageReceiver(ret) {
     if (resp.info === "BadResponse") {
         showConversation("[Error]" + resp.badInfo);
     } else if (resp.info === "ProgressResponse") {
+        $("#information").children().eq(0).remove();
         showConversation("[Progress]" + resp.progressInfo);
         $("#progress-bar").css("width", (resp.progressNow * 100.0 / resp.progressTarget) + "%" );
+    } else if (resp.info === "JsonResponse") {
+        //TODO: 绘图
     } else {
         showConversation("[Info]" + resp.info);
     }
@@ -97,15 +103,14 @@ $(function () {
     $("form").on('submit', function (e) {
         e.preventDefault();
     });
-    $( "#send" ).click(function() {
+    $( "#analyseRepository" ).click(function() {
         clearConversation();
         disconnect();
-        alert("TODO - " + $("#projectName").val());
-        // connect();
-        // requestAnalyseProject();
+        connect("RequestAnalyseProject");
     });
-    $( "#goto" ).click(function() {
-        $(location).attr("href", window.location.protocol + "//" + window.location.host + "/vis?url=" + $("#projectName").val());
+    $( "#reanalyse" ).click(function() {
+        alert("TODO");
+        // requestReanalyse();
     });
     $( "#deleteCache" ).click(function(){
         alert("TODO");
