@@ -32,7 +32,7 @@ public class ProjectManager {
     }
 
     /**
-     * [Public Methods (1/2)]根据projectUrl初始化ProjectManager；被构造函数调用；尝试载入缓存；不尝试下载项目
+     * [Public Methods (1/3)]根据projectUrl初始化ProjectManager；被构造函数调用；尝试载入缓存；不尝试下载项目
      *  尝试载入缓存过程正常return true
      *  尝试载入缓存过程异常return false（例如文件无法访问）
      * @param projectUrl
@@ -71,7 +71,7 @@ public class ProjectManager {
     }
 
     /**
-     * [Public Methods (2/2)]下载项目仓库，收集数据并制作缓存；首先尝试删除旧缓存
+     * [Public Methods (2/3)]下载项目仓库，收集数据并制作缓存；首先尝试删除旧缓存
      *  1. Commit解析过程不成功this.projectCache大概率(size()==0)，符合格式，但没有意义
      *  2. 文件操作（删除+新建）必须成功，否则System.exit(1)
      */
@@ -105,6 +105,30 @@ public class ProjectManager {
     }
 
     /**
+     * [Public Methods (3/3)]删除旧缓存（附带的先要删除APICounting缓存）
+     *  内部一处被调用：被downloadProject()
+     */
+    public void deleteAllCache() {
+        File countingCacheFile = new File(pureName + ".asv");//asv - APICounters save file
+        if (countingCacheFile.exists()) {
+            FileTool.deleteDir(countingCacheFile);
+            System.out.println("deleteAllCache(): Old Counting Cache Deleted");
+        } else {
+            System.out.println("deleteAllCache(): Old Counting Cache Not Exist");
+        }
+
+        File projectCacheFile = new File(pureName + ".psv");//psv - project save file
+        if (projectCacheFile.exists()) {
+            FileTool.deleteDir(projectCacheFile);
+            System.out.println("deleteAllCache(): Old Project Cache Deleted");
+        } else {
+            System.out.println("deleteAllCache(): Old Project Cache Not Exist");
+        }
+        projectCache = null;
+        isProjectCached = false;
+    }
+
+    /**
      * 读取固定文件中的Project对象；默认用户不会删除或者修改仓库缓存文件，不会新建缓存文件；在初始化时自动被调用
      * private 且仅一处调用：被initByUrl()
      * @throws IOException
@@ -127,30 +151,6 @@ public class ProjectManager {
         fis.close();
         isProjectCached = true;
         System.out.println("loadProjectCache(): Cache Loaded");
-    }
-
-    /**
-     * 删除旧缓存（附带的先要删除APICounting缓存）
-     * private 且仅一处调用：被downloadProject()
-     */
-    private void deleteAllCache() {
-        File countingCacheFile = new File(pureName + ".asv");//asv - APICounters save file
-        if (countingCacheFile.exists()) {
-            FileTool.deleteDir(countingCacheFile);
-            System.out.println("deleteAllCache(): Old Counting Cache Deleted");
-        } else {
-            System.out.println("deleteAllCache(): Old Counting Cache Not Exist");
-        }
-
-        File projectCacheFile = new File(pureName + ".psv");//psv - project save file
-        if (projectCacheFile.exists()) {
-            FileTool.deleteDir(projectCacheFile);
-            System.out.println("deleteAllCache(): Old Project Cache Deleted");
-        } else {
-            System.out.println("deleteAllCache(): Old Project Cache Not Exist");
-        }
-        projectCache = null;
-        isProjectCached = false;
     }
 
     /**

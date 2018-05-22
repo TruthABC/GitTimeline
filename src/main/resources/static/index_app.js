@@ -36,6 +36,17 @@ function requestAnalyseProject() {
     console.log("Sent Project Name - " + projectName);
 }
 
+/* Restful interface */
+function requestDeleteCache() {
+    var projectName = $("#projectName").val();
+    $.ajax({
+        url:urlPrefix + "/delete_cache?url=" + projectName,
+        success: function(ret){
+            alert(ret.info);
+        }
+    });
+}
+
 /* When Received Something from Web Socket (from Backend) */
 function messageReceiver(ret) {
     var resp = JSON.parse(ret.body);
@@ -113,7 +124,6 @@ $(function () {
         // requestReanalyse();
     });
     $( "#deleteCache" ).click(function(){
-        alert("TODO");
-        // requestDeleteCache();
+        requestDeleteCache();
     });
 });
