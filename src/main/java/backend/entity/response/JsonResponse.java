@@ -2,7 +2,7 @@ package backend.entity.response;
 
 public class JsonResponse extends CommonResponse  {
 
-    private String jsonInfo;
+    protected String jsonInfo;
 
     public JsonResponse() {
         super("JsonResponse");

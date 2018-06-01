@@ -1,5 +1,6 @@
 package backend.service;
 
+import backend.entity.response.CommitCountResponse;
 import backend.entity.response.CommonResponse;
 import backend.entity.response.JsonResponse;
 import backend.entity.response.ProgressResponse;
@@ -12,7 +13,6 @@ import serializable.APICounter;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 
 @Service
 public class AnalyseRepositorySocketService {
@@ -44,6 +44,7 @@ public class AnalyseRepositorySocketService {
             messagingTemplate.convertAndSend(DEST, new CommonResponse(tempMessage));
             System.out.println(tempMessage);
         }
+        messagingTemplate.convertAndSend(DEST, new CommitCountResponse("{\"commitCount\":" + pm.getProjectCache().getCommitList().size() + "}"));
 
         /* 借助APICountingManager对象实现“项目API解析” */
         tempMessage = "初始化：APICountingManager初始化中";

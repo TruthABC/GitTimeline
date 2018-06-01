@@ -57,7 +57,10 @@ function messageReceiver(ret) {
         showConversation("[Progress]" + resp.progressInfo);
         $("#progress-bar").css("width", (resp.progressNow * 100.0 / resp.progressTarget) + "%" );
     } else if (resp.info === "JsonResponse") {
-        //TODO: 绘图
+        refreshD3(JSON.parse(resp.jsonInfo));
+    } else if (resp.info === "CommitCountResponse") {
+        var jsonInfo = JSON.parse(resp.jsonInfo);
+        xMax = jsonInfo.commitCount;
     } else {
         showConversation("[Info]" + resp.info);
     }
@@ -114,14 +117,12 @@ $(function () {
     $("form").on('submit', function (e) {
         e.preventDefault();
     });
+    initD3();
     $( "#analyseRepository" ).click(function() {
+        initD3();
         clearConversation();
         disconnect();
         connect("RequestAnalyseProject");
-    });
-    $( "#reanalyse" ).click(function() {
-        alert("TODO");
-        // requestReanalyse();
     });
     $( "#deleteCache" ).click(function(){
         requestDeleteCache();

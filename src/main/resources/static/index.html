@@ -6,6 +6,8 @@
     <script src="webjars/jquery/jquery.min.js"></script>
     <script src="webjars/sockjs-client/sockjs.min.js"></script>
     <script src="webjars/stomp-websocket/stomp.min.js"></script>
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <script src="index_svg.js"></script>
     <script src="index_app.js"></script>
 </head>
 <body>
@@ -30,13 +32,10 @@
                 </div>
             </form>
         </div>
-        <div class="col-md-2">
+        <div class="col-md-3">
             <button id="analyseRepository" class="btn btn-default">Analyse Repository</button>
         </div>
-        <div class="col-md-2">
-            <button id="reanalyse" class="btn btn-default">Re-analyse</button>
-        </div>
-        <div class="col-md-2">
+        <div class="col-md-3">
             <button id="deleteCache" class="btn btn-default">Delete Cache</button>
         </div>
     </div>
@@ -75,6 +74,25 @@
                 </thead>
                 <tbody id="information">
                 </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="row">
+        <br/>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th>Preview</th>
+                </tr>
+                </thead>
+                <tbody><tr><td><div style="text-align: center;">
+                    <svg id="preview" width="960" height="500"></svg>
+                </div></td></tr></tbody>
             </table>
         </div>
     </div>
